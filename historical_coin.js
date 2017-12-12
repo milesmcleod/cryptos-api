@@ -56,7 +56,7 @@ module.exports = class HistoricalCoinModel {
           const update = {
             name: coin.name,
             symbol: coin.symbol,
-            $push: { hourlyData: {$each: [coin["bid"]], $slice: -60}}
+            $push: { hourlyData: {$each: [coin["bid"]], $slice: -24}}
           };
           // this is mongoDB notation; slice limits the length of the array
           // to 60 elements, keeping the most recent ones
@@ -77,7 +77,7 @@ module.exports = class HistoricalCoinModel {
           const update = {
             name: coin.name,
             symbol: coin.symbol,
-            $push: { dailyData: {$each: [coin["bid"]], $slice: -60}}
+            $push: { dailyData: {$each: [coin["bid"]], $slice: -365}}
           };
           // this is mongoDB notation; slice limits the length of the array
           // to 60 elements, keeping the most recent ones
@@ -104,35 +104,22 @@ module.exports = class HistoricalCoinModel {
   setTimerForHourlyUpdate(coinModel) {
     const millisecondsPerHour = 1000 * 60 * 60;
     const millisecondsUntilHour = millisecondsPerHour - (Date.now() % millisecondsPerHour);
-    coinModel.Coin.find((err, coins) => {
-      if (!err) {
-        coins.forEach((coin) => {
-          setTimeout(() => {
-            this.addHourlyData(coinModel, coin);
-            setInterval(() => {
-              this.addHourlyData(coinModel, coin);
-            }, millisecondsPerHour);
-          }, millisecondsUntilHour);
-        });
-      }
-    });
+    setTimeout(() => {
+      this.addHourlyData(coinModel);
+      setInterval(() => {
+        this.addHourlyData(coinModel);
+      }, millisecondsPerHour);
+    }, millisecondsUntilHour);
   }
 
   setTimerForDailyUpdate(coinModel) {
     const millisecondsPerDay = 1000 * 60 * 60 * 24;
     const millisecondsUntilMidnight = millisecondsPerDay - (Date.now() % millisecondsPerDay);
-    coinModel.Coin.find((err, coins) => {
-      if (!err) {
-        coins.forEach((coin) => {
-          setTimeout(() => {
-            this.addDailyData(coinModel, coin);
-            setInterval(() => {
-              this.addDailyData(coinModel, coin);
-            }, millisecondsPerDay);
-          }, millisecondsUntilMidnight);
-        });
-      }
-    });
+    setTimeout(() => {
+      this.addDailyData(coinModel);
+      setInterval(() => {
+        this.addDailyData(coinModel);
+      }, millisecondsPerDay);
+    }, millisecondsUntilMidnight);
   }
-
 };

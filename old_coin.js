@@ -19,13 +19,9 @@ module.exports = class CoinModel {
     this.Coin = Mongoose.model('Coin', this.coinSchema);
     this.getCoinNames = this.getCoinNames.bind(this);
     this.getCoinData = this.getCoinData.bind(this);
-    this.getBitcoin = this.getBitcoin.bind(this);
-    this.getEthereum = this.getEthereum.bind(this);
   }
 
   getData() {
-    //this.getBitCoin();
-    //this.getEthereum();
     this.getCoinNames().then((result) => {
       result.forEach((coin) => {
         this.getCoinData(coin)
@@ -34,17 +30,9 @@ module.exports = class CoinModel {
     });
   }
 
-  getBitcoin() {
-
-  }
-
-  getEthereum() {
-
-  }
-
   getCoinNames() {
     return new Promise((success, failure) => {
-      const request = https.get('https://bittrex.com/api/v1.1/public/getcurrencies', (response) => {
+      https.get('https://bittrex.com/api/v1.1/public/getcurrencies', (response) => {
         response.setEncoding("utf8");
         let body = "";
         response.on("data", data => {
@@ -72,25 +60,12 @@ module.exports = class CoinModel {
           }
         });
       });
-      request.on('socket', function (socket) { //this fix comes from: https://stackoverflow.com/questions/6214902/how-to-set-a-timeout-on-a-http-request-in-node
-        socket.setTimeout(5000);
-        socket.on('timeout', function() {
-          request.abort();
-        });
-      });
-      request.on('error', function(err) {
-          if (err.code === "ECONNRESET") {
-              console.log("Timeout occurs");
-              //specific error treatment
-          }
-          //other error treatment
-      });
     });
   }
 
   getCoinData(coin) {
     return new Promise((success, failure) => {
-      const request = https.get(`https://bittrex.com/api/v1.1/public/getmarketsummary?market=BTC-${coin.symbol}`, (response) => {
+      https.get(`https://bittrex.com/api/v1.1/public/getmarketsummary?market=BTC-${coin.symbol}`, (response) => {
         response.setEncoding("utf8");
         let body = "";
         response.on("data", data => {
@@ -122,19 +97,6 @@ module.exports = class CoinModel {
             console.log(e);
           }
         });
-      });
-      request.on('socket', function (socket) {
-        socket.setTimeout(5000);
-        socket.on('timeout', function() {
-          request.abort();
-        });
-      });
-      request.on('error', function(err) {
-          if (err.code === "ECONNRESET") {
-              console.log("Timeout occurs");
-              //specific error treatment
-          }
-          //other error treatment
       });
     });
   }

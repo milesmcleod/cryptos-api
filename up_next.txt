@@ -1,0 +1,7 @@
+need these values in each coin for jay:
+
+fix ETH market queries
+
+bid value in USD
+market cap ( volume * bid value in USD )
+24 hour percent change ( bid - prevDay) / prevDay
