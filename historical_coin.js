@@ -27,86 +27,112 @@ module.exports = class HistoricalCoinModel {
     this.addDailyData = this.addDailyData.bind(this);
   }
 
-  addMinuteData(coin) {
-    const query = { name: coin.name };
-    const update = {
-      name: coin.name,
-      symbol: coin.symbol,
-      $push: { minuteData: {$each: [coin["bid"]], $slice: -60}}
-    };
-    // this is mongoDB notation; slice limits the length of the array
-    // to 60 elements, keeping the most recent ones
-    const options = { upsert: true };
-    this.HistoricalCoin.findOneAndUpdate(query, update, options, (error, doc) => {
-      if (error) console.log(error);
+  addMinuteData(coinModel) {
+    coinModel.Coin.find((err, coins) => {
+      if (!err) {
+        coins.forEach((coin) => {
+          const query = { name: coin.name };
+          const update = {
+            name: coin.name,
+            symbol: coin.symbol,
+            $push: { minuteData: {$each: [coin["bid"]], $slice: -60}}
+          };
+          // this is mongoDB notation; slice limits the length of the array
+          // to 60 elements, keeping the most recent ones
+          const options = { upsert: true };
+          this.HistoricalCoin.findOneAndUpdate(query, update, options, (error, doc) => {
+            if (error) console.log(error);
+          });
+        });
+      }
     });
   }
 
-  addHourlyData(coin) {
-    const query = { name: coin.name };
-    const update = {
-      name: coin.name,
-      symbol: coin.symbol,
-      $push: { hourlyData: {$each: [coin["bid"]], $slice: -24}}
-    };
-    const options = { upsert: true };
-    this.HistoricalCoin.findOneAndUpdate(query, update, options, (error, doc) => {
-      if (error) console.log(error);
+  addHourlyData(coinModel) {
+    coinModel.Coin.find((err, coins) => {
+      if (!err) {
+        coins.forEach((coin) => {
+          const query = { name: coin.name };
+          const update = {
+            name: coin.name,
+            symbol: coin.symbol,
+            $push: { hourlyData: {$each: [coin["bid"]], $slice: -60}}
+          };
+          // this is mongoDB notation; slice limits the length of the array
+          // to 60 elements, keeping the most recent ones
+          const options = { upsert: true };
+          this.HistoricalCoin.findOneAndUpdate(query, update, options, (error, doc) => {
+            if (error) console.log(error);
+          });
+        });
+      }
     });
   }
 
-  addDailyData(coin) {
-    const query = { name: coin.name };
-    const update = {
-      name: coin.name,
-      symbol: coin.symbol,
-      $push: { dailyData: {$each: [coin["bid"]], $slice: -365}}
-    };
-    const options = { upsert: true };
-    this.HistoricalCoin.findOneAndUpdate(query, update, options, (error, doc) => {
-      if (error) console.log(error);
+  addDailyData(coinModel) {
+    coinModel.Coin.find((err, coins) => {
+      if (!err) {
+        coins.forEach((coin) => {
+          const query = { name: coin.name };
+          const update = {
+            name: coin.name,
+            symbol: coin.symbol,
+            $push: { dailyData: {$each: [coin["bid"]], $slice: -60}}
+          };
+          // this is mongoDB notation; slice limits the length of the array
+          // to 60 elements, keeping the most recent ones
+          const options = { upsert: true };
+          this.HistoricalCoin.findOneAndUpdate(query, update, options, (error, doc) => {
+            if (error) console.log(error);
+          });
+        });
+      }
     });
   }
 
-  setTimerForMinuteUpdate(coin) {
+  setTimerForMinuteUpdate(coinModel) {
     const millisecondsPerMinute = 1000 * 60;
     const millisecondsUntilMinute = millisecondsPerMinute - (Date.now() % millisecondsPerMinute);
     setTimeout(() => {
-      this.addMinuteData(coin);
+      this.addMinuteData(coinModel);
       setInterval(() => {
-        this.addMinuteData(coin);
+        this.addMinuteData(coinModel);
       }, millisecondsPerMinute);
     }, millisecondsUntilMinute);
   }
 
-  setTimerForHourlyUpdate(coin) {
+  setTimerForHourlyUpdate(coinModel) {
     const millisecondsPerHour = 1000 * 60 * 60;
     const millisecondsUntilHour = millisecondsPerHour - (Date.now() % millisecondsPerHour);
-    setTimeout(() => {
-      this.addHourlyData(coin);
-      setInterval(() => {
-        this.addHourlyData(coin);
-      }, millisecondsPerHour);
-    }, millisecondsUntilHour);
-
+    coinModel.Coin.find((err, coins) => {
+      if (!err) {
+        coins.forEach((coin) => {
+          setTimeout(() => {
+            this.addHourlyData(coinModel, coin);
+            setInterval(() => {
+              this.addHourlyData(coinModel, coin);
+            }, millisecondsPerHour);
+          }, millisecondsUntilHour);
+        });
+      }
+    });
   }
 
-  setTimerForDailyUpdate(coin) {
+  setTimerForDailyUpdate(coinModel) {
     const millisecondsPerDay = 1000 * 60 * 60 * 24;
     const millisecondsUntilMidnight = millisecondsPerDay - (Date.now() % millisecondsPerDay);
-    setTimeout(() => {
-      this.addDailyData(coin);
-      setInterval(() => {
-        this.addDailyData(coin);
-      }, millisecondsPerDay);
-    }, millisecondsUntilMidnight);
+    coinModel.Coin.find((err, coins) => {
+      if (!err) {
+        coins.forEach((coin) => {
+          setTimeout(() => {
+            this.addDailyData(coinModel, coin);
+            setInterval(() => {
+              this.addDailyData(coinModel, coin);
+            }, millisecondsPerDay);
+          }, millisecondsUntilMidnight);
+        });
+      }
+    });
   }
-
-  storeHistoricalData() {
-    //store the day's high/low/???
-    //every night at midnight the server should call this
-    //shift all data
-  }
-
 
 };

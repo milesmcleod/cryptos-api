@@ -15,12 +15,12 @@ app.use(BodyParser.json());
 Mongoose.Promise = global.Promise;
 
 try {
-  // Mongoose.connect('mongodb://localhost/cryptos_coins', {
-  //   useMongoClient: true,
-  // });
-  Mongoose.connect(process.env.MONGODB_URI, {
+  Mongoose.connect('mongodb://localhost/cryptos_coins', {
     useMongoClient: true,
   });
+  // Mongoose.connect(process.env.MONGODB_URI, {
+  //   useMongoClient: true,
+  // });
   console.log('connected to mongoDB');
 } catch (e) {
   console.log('error connecting to mongo');
@@ -53,32 +53,26 @@ setInterval(() => {
   coinModel.getData();
 }, 10000);
 
-// setTimeout(() => {
-//   coinModel.Coin.find((err, coins) => {
-//     if (!err) {
-//       coins.forEach((coin) => {
-//         historicalCoinModel.setTimerForMinuteUpdate(coin);
-//         historicalCoinModel.setTimerForHourlyUpdate(coin);
-//         historicalCoinModel.setTimerForDailyUpdate(coin);
-//       });
-//     }
-//   });
-// }, 30000);
+setTimeout(() => {
+  historicalCoinModel.setTimerForMinuteUpdate(coinModel);
+  historicalCoinModel.setTimerForHourlyUpdate(coinModel);
+  historicalCoinModel.setTimerForDailyUpdate(coinModel);
+}, 30000);
 
-// const server = app.listen('8080', 'localhost', () => {
-//   console.log('running server on port ' + server.address().port);
-// }).on('error', (err) => {
-//     console.log('on error handler');
-//     console.log(err);
-// });
-
-const server = app.listen(process.env.PORT || 8080, () => {
-    var port = server.address().port;
-    console.log("server up and running on port", port);
-  }).on('error', (err) => {
+const server = app.listen('8080', 'localhost', () => {
+  console.log('running server on port ' + server.address().port);
+}).on('error', (err) => {
     console.log('on error handler');
     console.log(err);
 });
+
+// const server = app.listen(process.env.PORT || 8080, () => {
+//     var port = server.address().port;
+//     console.log("server up and running on port", port);
+//   }).on('error', (err) => {
+//     console.log('on error handler');
+//     console.log(err);
+// });
 
 process.on('uncaughtException', (err) => {
     console.log('process.on handler');
