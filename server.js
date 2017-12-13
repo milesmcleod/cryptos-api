@@ -34,6 +34,7 @@ const historicalCoinModel = new HistoricalCoinModel();
 app.get('/coins', (req, res) => {
   coinModel.Coin.find((err, coins) => {
     if (err) return res.status(500).send(err);
+    coins = coins.sort((x, y) => x.id - y.id);
     res.send(coins);
   });
 });
@@ -55,8 +56,7 @@ setInterval(() => {
 
 setTimeout(() => {
   historicalCoinModel.setTimerForMinuteUpdate(coinModel);
-  historicalCoinModel.setTimerForHourlyUpdate(coinModel);
-  historicalCoinModel.setTimerForDailyUpdate(coinModel);
+  historicalCoinModel.setTimerForFifteenMinuteUpdate(coinModel);
 }, 30000);
 
 const server = app.listen('8080', 'localhost', () => {

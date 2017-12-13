@@ -7,9 +7,8 @@ module.exports = class HistoricalCoinModel {
     this.historicalCoinSchema = new Mongoose.Schema({
       name: String,
       symbol: String,
-      minuteData: Array,
-      hourlyData: Array,
-      dailyData: Array
+      valuePerMinute: Array,
+      valuePerFifteenMinutes: Array
     }); //historical data
     // new historical data is pushed, to data array, and we never let it
     // get longer than 365 entries. today is array[-1], and the
@@ -23,8 +22,7 @@ module.exports = class HistoricalCoinModel {
       this.historicalCoinSchema
     );
     this.addMinuteData = this.addMinuteData.bind(this);
-    this.addHourlyData = this.addHourlyData.bind(this);
-    this.addDailyData = this.addDailyData.bind(this);
+    this.addFifteenMinuteData = this.addHourlyData.bind(this);
   }
 
   addMinuteData(coinModel) {
@@ -35,7 +33,12 @@ module.exports = class HistoricalCoinModel {
           const update = {
             name: coin.name,
             symbol: coin.symbol,
-            $push: { minuteData: {$each: [coin["bid"]], $slice: -60}}
+            $push: {
+              valuePerMinute:{
+                $each: [{time: Date.now(), value: coin["bid"]}],
+                $slice: -60
+              }
+            }
           };
           // this is mongoDB notation; slice limits the length of the array
           // to 60 elements, keeping the most recent ones
@@ -48,7 +51,7 @@ module.exports = class HistoricalCoinModel {
     });
   }
 
-  addHourlyData(coinModel) {
+  addFifteenMinuteData(coinModel) {
     coinModel.Coin.find((err, coins) => {
       if (!err) {
         coins.forEach((coin) => {
@@ -56,28 +59,12 @@ module.exports = class HistoricalCoinModel {
           const update = {
             name: coin.name,
             symbol: coin.symbol,
-            $push: { hourlyData: {$each: [coin["bid"]], $slice: -24}}
-          };
-          // this is mongoDB notation; slice limits the length of the array
-          // to 60 elements, keeping the most recent ones
-          const options = { upsert: true };
-          this.HistoricalCoin.findOneAndUpdate(query, update, options, (error, doc) => {
-            if (error) console.log(error);
-          });
-        });
-      }
-    });
-  }
-
-  addDailyData(coinModel) {
-    coinModel.Coin.find((err, coins) => {
-      if (!err) {
-        coins.forEach((coin) => {
-          const query = { name: coin.name };
-          const update = {
-            name: coin.name,
-            symbol: coin.symbol,
-            $push: { dailyData: {$each: [coin["bid"]], $slice: -365}}
+            $push: {
+              valuePerFifteenMinutes:{
+                $each: [{time: Date.now(), value: coin["bid"]}],
+                $slice: -60
+              }
+            }
           };
           // this is mongoDB notation; slice limits the length of the array
           // to 60 elements, keeping the most recent ones
@@ -101,25 +88,15 @@ module.exports = class HistoricalCoinModel {
     }, millisecondsUntilMinute);
   }
 
-  setTimerForHourlyUpdate(coinModel) {
-    const millisecondsPerHour = 1000 * 60 * 60;
-    const millisecondsUntilHour = millisecondsPerHour - (Date.now() % millisecondsPerHour);
+  setTimerForFifteenMinuteUpdate(coinModel) {
+    const millisecondsPerFifteenMinutes = 1000 * 60 * 15;
+    const millisecondsUntilFifteenMinutes = millisecondsPerFifteenMinutes - (Date.now() % millisecondsPerFifteenMinutes);
     setTimeout(() => {
       this.addHourlyData(coinModel);
       setInterval(() => {
         this.addHourlyData(coinModel);
-      }, millisecondsPerHour);
-    }, millisecondsUntilHour + 1000);
+      }, millisecondsPerFifteenMinutes);
+    }, millisecondsUntilFifteenMinutes + 1000);
   }
 
-  setTimerForDailyUpdate(coinModel) {
-    const millisecondsPerDay = 1000 * 60 * 60 * 24;
-    const millisecondsUntilMidnight = millisecondsPerDay - (Date.now() % millisecondsPerDay);
-    setTimeout(() => {
-      this.addDailyData(coinModel);
-      setInterval(() => {
-        this.addDailyData(coinModel);
-      }, millisecondsPerDay);
-    }, millisecondsUntilMidnight + 2000);
-  }
 };
