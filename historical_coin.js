@@ -22,7 +22,7 @@ module.exports = class HistoricalCoinModel {
       this.historicalCoinSchema
     );
     this.addMinuteData = this.addMinuteData.bind(this);
-    this.addFifteenMinuteData = this.addHourlyData.bind(this);
+    this.addFifteenMinuteData = this.addFifteenMinuteData.bind(this);
   }
 
   addMinuteData(coinModel) {
