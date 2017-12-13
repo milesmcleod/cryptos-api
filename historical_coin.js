@@ -109,7 +109,7 @@ module.exports = class HistoricalCoinModel {
       setInterval(() => {
         this.addHourlyData(coinModel);
       }, millisecondsPerHour);
-    }, millisecondsUntilHour);
+    }, millisecondsUntilHour + 1000);
   }
 
   setTimerForDailyUpdate(coinModel) {
@@ -120,6 +120,6 @@ module.exports = class HistoricalCoinModel {
       setInterval(() => {
         this.addDailyData(coinModel);
       }, millisecondsPerDay);
-    }, millisecondsUntilMidnight);
+    }, millisecondsUntilMidnight + 2000);
   }
 };
