@@ -10,12 +10,6 @@ module.exports = class HistoricalCoinModel {
       valuePerMinute: Array,
       valuePerFifteenMinutes: Array
     }); //historical data
-    // new historical data is pushed, to data array, and we never let it
-    // get longer than 365 entries. today is array[-1], and the
-    // oldest data point is array[0].
-
-    // this means that every time a new batch of current data comes in,
-    // array[-1] should be overwritten.
 
     this.HistoricalCoin = Mongoose.model(
       'HistoricalCoin',
@@ -26,6 +20,7 @@ module.exports = class HistoricalCoinModel {
   }
 
   addMinuteData(coinModel) {
+    const dataLimit = -60 * 24;
     coinModel.Coin.find((err, coins) => {
       if (!err) {
         coins.forEach((coin) => {
@@ -36,7 +31,7 @@ module.exports = class HistoricalCoinModel {
             $push: {
               valuePerMinute:{
                 $each: [{time: Date.now(), value: coin["bid"]}],
-                $slice: -60
+                $slice: dataLimit
               }
             }
           };
@@ -52,6 +47,7 @@ module.exports = class HistoricalCoinModel {
   }
 
   addFifteenMinuteData(coinModel) {
+    const dataLimit = -7 * 24 * 4;
     coinModel.Coin.find((err, coins) => {
       if (!err) {
         coins.forEach((coin) => {
@@ -62,7 +58,7 @@ module.exports = class HistoricalCoinModel {
             $push: {
               valuePerFifteenMinutes:{
                 $each: [{time: Date.now(), value: coin["bid"]}],
-                $slice: -60
+                $slice: dataLimit
               }
             }
           };
