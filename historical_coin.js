@@ -60,7 +60,7 @@ module.exports = class HistoricalCoinModel {
             name: coin.name,
             symbol: coin.symbol,
             $push: {
-              valuePerFifteenMinutes:{
+              valuePerFifteenMinutesBTC:{
                 $each: [{time: Date.now(), value: coin["bid"]}],
                 $slice: dataLimit
               },
