@@ -35,8 +35,6 @@ module.exports = class HistoricalCoinModel {
               }
             }
           };
-          // this is mongoDB notation; slice limits the length of the array
-          // to 60 elements, keeping the most recent ones
           const options = { upsert: true };
           this.HistoricalCoin.findOneAndUpdate(query, update, options, (error, doc) => {
             if (error) console.log(error);
@@ -62,8 +60,6 @@ module.exports = class HistoricalCoinModel {
               }
             }
           };
-          // this is mongoDB notation; slice limits the length of the array
-          // to 60 elements, keeping the most recent ones
           const options = { upsert: true };
           this.HistoricalCoin.findOneAndUpdate(query, update, options, (error, doc) => {
             if (error) console.log(error);

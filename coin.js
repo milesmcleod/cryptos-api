@@ -24,6 +24,8 @@ module.exports = class CoinModel {
     this.getCoinData = this.getCoinData.bind(this);
     this.getBitcoin = this.getBitcoin.bind(this);
     this.getEthereum = this.getEthereum.bind(this);
+    this.getMarketCaps = this.getMarketCaps.bind(this);
+    this.updateMarketCaps = this.updateMarketCaps.bind(this);
   }
 
   getData() {
@@ -37,7 +39,9 @@ module.exports = class CoinModel {
           .then(null, (errors) => console.log(errors));
         }
       }, (errors) => console.log(errors));
-    });
+    })
+    .then(() => this.getMarketCaps())
+    .then((data) => this.updateMarketCaps(data));
   }
 
   getBitcoin() {
@@ -69,7 +73,6 @@ module.exports = class CoinModel {
               coin.ask = body['result'][0]["Ask"];
               coin.prevDay = body['result'][0]["PrevDay"];
               coin.bidUSD = coin.bid;
-              coin.marketCapUSD = coin.bid * coin.volume;
               coin.percentChangeIn24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
               const query = { name: coin.name };
               const update = coin;
@@ -129,7 +132,6 @@ module.exports = class CoinModel {
               coin.ask = body['result'][0]["Ask"];
               coin.prevDay = body['result'][0]["PrevDay"];
               coin.bidUSD = coin.bid * bitcoinValueInUSD;
-              coin.marketCapUSD = coin.bidUSD * coin.volume;
               coin.percentChangeIn24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
               const query = { name: coin.name };
               const update = coin;
@@ -231,7 +233,6 @@ module.exports = class CoinModel {
               coin.ask = body['result'][0]["Ask"];
               coin.prevDay = body['result'][0]["PrevDay"];
               coin.bidUSD = coin.bid * bitcoinValueInUSD;
-              coin.marketCapUSD = coin.bidUSD * coin.volume;
               coin.percentChangeIn24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
               const query = { name: coin.name };
               const update = coin;
@@ -257,6 +258,57 @@ module.exports = class CoinModel {
               //specific error treatment
           }
           //other error treatment
+      });
+    });
+  }
+
+  getMarketCaps() {
+    return new Promise((success, failure) => {
+      const request = https.get(`https://api.coinmarketcap.com/v1/ticker/`, (response) => {
+        response.setEncoding("utf8");
+        let body = "";
+        response.on("data", data => {
+          body += data;
+        });
+        response.on("uncaughtException", (err) => {
+          console.log("Caught connection error: ");
+          console.log(err);
+          return;
+        });
+        response.on("end", () => {
+          try {
+            body = JSON.parse(body);
+          } catch (e) {
+            console.log(e);
+          }
+          success(body);
+        });
+      });
+      request.on('socket', function (socket) {
+        socket.setTimeout(5000);
+        socket.on('timeout', function() {
+          request.abort();
+        });
+      });
+      request.on('error', function(err) {
+          if (err.code === "ECONNRESET") {
+              console.log("Timeout occurs");
+              //specific error treatment
+          }
+          //other error treatment
+      });
+    });
+  }
+
+  updateMarketCaps(marketCapData) {
+    marketCapData.forEach((coin) => {
+      const query = { symbol: coin.symbol };
+      const update = {
+        marketCapUSD: coin.market_cap_usd
+      };
+      const options = {};
+      this.Coin.findOneAndUpdate(query, update, options, () => {
+        // console.log(update);
       });
     });
   }
