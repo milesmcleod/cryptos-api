@@ -30,10 +30,10 @@ module.exports = class CoinModel {
     this.getBitcoin()
     .then((bitcoinValueInUSD) => this.getEthereum(bitcoinValueInUSD))
     .then((bitcoinValueInUSD) => this.getCoinNames(bitcoinValueInUSD))
-    .then((result, bitcoinValueInUSD) => {
-      result.forEach((coin) => {
+    .then((result) => {
+      result[0].forEach((coin) => {
         if (coin.name !== 'Ethereum' && coin.name !== 'Bitcoin') {
-          this.getCoinData(coin, bitcoinValueInUSD)
+          this.getCoinData(coin, result[1])
           .then(null, (errors) => console.log(errors));
         }
       }, (errors) => console.log(errors));
@@ -184,7 +184,7 @@ module.exports = class CoinModel {
                 name: coin.CurrencyLong,
                 type: (coin.CoinType === 'BITCOIN') ? 'BTC' : 'ETH'
               }));
-              success(result, bitcoinValueInUSD);
+              success([result, bitcoinValueInUSD]);
             }
           } catch (e) {
             console.log(e);
@@ -208,8 +208,8 @@ module.exports = class CoinModel {
   }
 
   getCoinData(coin, bitcoinValueInUSD) {
+    console.log(bitcoinValueInUSD);
     return new Promise((success, failure) => {
-      console.log(coin);
       const request = https.get(`https://bittrex.com/api/v1.1/public/getmarketsummary?market=${coin.type}-${coin.symbol}`, (response) => {
         response.setEncoding("utf8");
         let body = "";
@@ -238,7 +238,7 @@ module.exports = class CoinModel {
               const update = coin;
               const options = { upsert: true };
               this.Coin.findOneAndUpdate(query, update, options, () => {
-                console.log(update);
+                // console.log(update);
               });
             }
           } catch (e) {
