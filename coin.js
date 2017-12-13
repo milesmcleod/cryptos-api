@@ -211,7 +211,7 @@ module.exports = class CoinModel {
 
   getCoinData(coin, bitcoinValueInUSD) {
     return new Promise((success, failure) => {
-      const request = https.get(`https://bittrex.com/api/v1.1/public/getmarketsummary?market=${coin.type}-${coin.symbol}`, (response) => {
+      const request = https.get(`https://bittrex.com/api/v1.1/public/getmarketsummary?market=BTC-${coin.symbol}`, (response) => {
         response.setEncoding("utf8");
         let body = "";
         response.on("data", data => {
