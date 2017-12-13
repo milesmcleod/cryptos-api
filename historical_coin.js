@@ -7,8 +7,10 @@ module.exports = class HistoricalCoinModel {
     this.historicalCoinSchema = new Mongoose.Schema({
       name: String,
       symbol: String,
-      valuePerMinute: Array,
-      valuePerFifteenMinutes: Array
+      valuePerMinuteBTC: Array,
+      valuePerFifteenMinutesBTC: Array,
+      valuePerMinuteUSD: Array,
+      valuePerFifteenMinutesUSD: Array
     }); //historical data
 
     this.HistoricalCoin = Mongoose.model(
@@ -29,8 +31,12 @@ module.exports = class HistoricalCoinModel {
             name: coin.name,
             symbol: coin.symbol,
             $push: {
-              valuePerMinute:{
+              valuePerMinuteBTC:{
                 $each: [{time: Date.now(), value: coin["bid"]}],
+                $slice: dataLimit
+              },
+              valuePerMinuteUSD:{
+                $each: [{time: Date.now(), value: coin["bidUSD"]}],
                 $slice: dataLimit
               }
             }
@@ -56,6 +62,10 @@ module.exports = class HistoricalCoinModel {
             $push: {
               valuePerFifteenMinutes:{
                 $each: [{time: Date.now(), value: coin["bid"]}],
+                $slice: dataLimit
+              },
+              valuePerFifteenMinutesUSD:{
+                $each: [{time: Date.now(), value: coin["bidUSD"]}],
                 $slice: dataLimit
               }
             }

@@ -38,9 +38,8 @@ app.get('/coins', (req, res) => {
 
 app.get('/history/:coinSymbol', (req, res) => {
   historicalCoinModel.HistoricalCoin.findOne(
-    {"symbol": req.params.coinSymbol},
+    {"symbol": req.params.coinSymbol.toUpperCase()},
     (err, historicalCoin) => {
-      console.log(req.params.coinSymbol);
       if (err) return res.status(500).send(err);
       res.send(historicalCoin);
     }
@@ -49,27 +48,30 @@ app.get('/history/:coinSymbol', (req, res) => {
 
 app.get('/history/:coinSymbol/:dataType', (req, res) => {
   historicalCoinModel.HistoricalCoin.findOne(
-    {"symbol": req.params.coinSymbol},
+    {"symbol": req.params.coinSymbol.toUpperCase()},
     (err, historicalCoin) => {
-      console.log(req.params.coinSymbol);
-      let data;
+      let dataBTC;
+      let dataUSD;
       let dataIntervalInMilliseconds;
       let dataIntervalInSeconds;
       let dataIntervalInMinutes;
       if (err) {
         return res.status(500).send(err);
-      } else if (req.params.dataType === 'hour') {
-        data = historicalCoin.valuePerMinute.slice(-60);
+      } else if (req.params.dataType.toLowerCase() === 'hour') {
+        dataBTC = historicalCoin.valuePerMinuteBTC.slice(-60);
+        dataUSD = historicalCoin.valuePerMinuteUSD.slice(-60);
         dataIntervalInMilliseconds = 60 * 1000;
         dataIntervalInSeconds = 60;
         dataIntervalInMinutes = 1;
-      } else if (req.params.dataType === 'day') {
-        data = historicalCoin.valuePerMinute;
+      } else if (req.params.dataType.toLowerCase() === 'day') {
+        dataBTC = historicalCoin.valuePerMinuteBTC;
+        dataUSD = historicalCoin.valuePerMinuteUSD;
         dataIntervalInMilliseconds = 60 * 1000;
         dataIntervalInSeconds = 60;
         dataIntervalInMinutes = 1;
-      } else if (req.params.dataType === 'week') {
-        data = historicalCoin.valuePerFifteenMinutes;
+      } else if (req.params.dataType.toLowerCase() === 'week') {
+        dataBTC = historicalCoin.valuePerFifteenMinutesBTC;
+        dataUSD = historicalCoin.valuePerFifteenMinutesUSD;
         dataIntervalInMilliseconds = 15 * 60 * 1000;
         dataIntervalInSeconds = 60 * 15;
         dataIntervalInMinutes = 15;
@@ -79,7 +81,8 @@ app.get('/history/:coinSymbol/:dataType', (req, res) => {
         dataIntervalInMilliseconds,
         dataIntervalInSeconds,
         dataIntervalInMinutes,
-        data
+        dataUSD,
+        dataBTC
       });
     }
   );
