@@ -53,17 +53,32 @@ app.get('/history/:coinSymbol/:dataType', (req, res) => {
     (err, historicalCoin) => {
       console.log(req.params.coinSymbol);
       let data;
+      let dataIntervalInMilliseconds;
+      let dataIntervalInSeconds;
+      let dataIntervalInMinutes;
       if (err) {
         return res.status(500).send(err);
       } else if (req.params.dataType === 'hour') {
         data = historicalCoin.valuePerMinute.slice(-60);
+        dataIntervalInMilliseconds = 60 * 1000;
+        dataIntervalInSeconds = 60;
+        dataIntervalInMinutes = 1;
       } else if (req.params.dataType === 'day') {
         data = historicalCoin.valuePerMinute;
+        dataIntervalInMilliseconds = 60 * 1000;
+        dataIntervalInSeconds = 60;
+        dataIntervalInMinutes = 1;
       } else if (req.params.dataType === 'week') {
         data = historicalCoin.valuePerFifteenMinutes;
+        dataIntervalInMilliseconds = 15 * 60 * 1000;
+        dataIntervalInSeconds = 60 * 15;
+        dataIntervalInMinutes = 15;
       }
       res.send({
         symbol: req.params.coinSymbol,
+        dataIntervalInMilliseconds,
+        dataIntervalInSeconds,
+        dataIntervalInMinutes,
         data
       });
     }
