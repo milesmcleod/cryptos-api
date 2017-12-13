@@ -47,6 +47,29 @@ app.get('/history/:coinSymbol', (req, res) => {
   );
 });
 
+app.get('/history/:coinSymbol/:dataType', (req, res) => {
+  historicalCoinModel.HistoricalCoin.findOne(
+    {"symbol": req.params.coinSymbol},
+    (err, historicalCoin) => {
+      console.log(req.params.coinSymbol);
+      let data;
+      if (err) {
+        return res.status(500).send(err);
+      } else if (req.params.dataType === 'hour') {
+        data = historicalCoin.valuePerMinute.slice(-60);
+      } else if (req.params.dataType === 'day') {
+        data = historicalCoin.valuePerMinute;
+      } else if (req.params.dataType === 'week') {
+        data = historicalCoin.valuePerFifteenMinutes;
+      }
+      res.send({
+        symbol: req.params.coinSymbol,
+        data
+      });
+    }
+  );
+});
+
 coinModel.getData();
 
 setInterval(() => {

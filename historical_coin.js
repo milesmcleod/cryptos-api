@@ -88,9 +88,9 @@ module.exports = class HistoricalCoinModel {
     const millisecondsPerFifteenMinutes = 1000 * 60 * 15;
     const millisecondsUntilFifteenMinutes = millisecondsPerFifteenMinutes - (Date.now() % millisecondsPerFifteenMinutes);
     setTimeout(() => {
-      this.addHourlyData(coinModel);
+      this.addFifteenMinuteData(coinModel);
       setInterval(() => {
-        this.addHourlyData(coinModel);
+        this.addFifteenMinuteData(coinModel);
       }, millisecondsPerFifteenMinutes);
     }, millisecondsUntilFifteenMinutes + 1000);
   }
