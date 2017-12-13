@@ -1,6 +1,10 @@
 need these values in each coin for jay:
 
-fix ETH market queries
+return an object instead of an array to the /coins get, where the key value pairs are [rank/id]: { coinObject }
+
+create a get history API endpoint where all coin histories are sent up as an object where the key value pairs are [symbol]: { historyObject }
+
+fix ETH market queries so that getCoinData works for both BTC- and ETH-based currencies
 
 bid value in USD
 market cap ( volume * bid value in USD )
