@@ -14,7 +14,10 @@ module.exports = class CoinModel {
       last: Number,
       bid: Number,
       ask: Number,
-      prevDay: Number
+      prevDay: Number,
+      bidUSD: Number,
+      marketCapUSD: Number,
+      percentChangeIn24Hours: Number
     }); //live data
     this.Coin = Mongoose.model('Coin', this.coinSchema);
     this.getCoinNames = this.getCoinNames.bind(this);
@@ -24,12 +27,15 @@ module.exports = class CoinModel {
   }
 
   getData() {
-    //this.getBitCoin();
-    //this.getEthereum();
-    this.getCoinNames().then((result) => {
+    this.getBitcoin()
+    .then((bitcoinValueInUSD) => this.getEthereum(bitcoinValueInUSD))
+    .then((bitcoinValueInUSD) => this.getCoinNames(bitcoinValueInUSD))
+    .then((result, bitcoinValueInUSD) => {
       result.forEach((coin) => {
-        this.getCoinData(coin)
-        .then(null, (errors) => console.log(errors));
+        if (coin.name !== 'Ethereum' && coin.name !== 'Bitcoin') {
+          this.getCoinData(coin, bitcoinValueInUSD)
+          .then(null, (errors) => console.log(errors));
+        }
       }, (errors) => console.log(errors));
     });
   }
@@ -50,6 +56,7 @@ module.exports = class CoinModel {
         response.on("end", () => {
           try { body = JSON.parse(body);
             if (body["success"] === true) {
+              this.bitcoinValueInUSD = body['result'][0]['bid'];
               let coin = {};
               coin.id = -1;
               coin.symbol = 'BTC';
@@ -61,20 +68,40 @@ module.exports = class CoinModel {
               coin.bid = body['result'][0]["Bid"];
               coin.ask = body['result'][0]["Ask"];
               coin.prevDay = body['result'][0]["PrevDay"];
+              coin.bidUSD = coin.bid;
+              coin.marketCapUSD = coin.bid * coin.volume;
+              coin.percentChangeIn24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
               const query = { name: coin.name };
               const update = coin;
               const options = { upsert: true };
-              this.Coin.findOneAndUpdate(query, update, options);
+              this.Coin.findOneAndUpdate(query, update, options, () => {
+                // console.log('updated');
+              });
+              success(coin.bidUSD);
             }
+            success();
           } catch (e) {
             console.log(e);
           }
+        });
+        request.on('socket', function (socket) {
+          socket.setTimeout(5000);
+          socket.on('timeout', function() {
+            request.abort();
+          });
+        });
+        request.on('error', function(err) {
+            if (err.code === "ECONNRESET") {
+                console.log("Timeout occurs");
+                //specific error treatment
+            }
+            //other error treatment
         });
       });
     });
   }
 
-  getEthereum() {
+  getEthereum(bitcoinValueInUSD) {
     return new Promise((success, failure) => {
       const request = https.get("https://bittrex.com/api/v1.1/public/getmarketsummary?market=BTC-ETH", (response) => {
         response.setEncoding("utf8");
@@ -91,9 +118,9 @@ module.exports = class CoinModel {
           try { body = JSON.parse(body);
             if (body["success"] === true) {
               let coin = {};
-              coin.id = -1;
-              coin.symbol = 'BTC';
-              coin.name = "Bitcoin";
+              coin.id = -2;
+              coin.symbol = 'ETH';
+              coin.name = "Ethereum";
               coin.high = body['result'][0]["High"];
               coin.low = body['result'][0]["Low"];
               coin.volume = body['result'][0]["Volume"];
@@ -101,20 +128,39 @@ module.exports = class CoinModel {
               coin.bid = body['result'][0]["Bid"];
               coin.ask = body['result'][0]["Ask"];
               coin.prevDay = body['result'][0]["PrevDay"];
+              coin.bidUSD = coin.bid * bitcoinValueInUSD;
+              coin.marketCapUSD = coin.bidUSD * coin.volume;
+              coin.percentChangeIn24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
               const query = { name: coin.name };
               const update = coin;
               const options = { upsert: true };
-              this.Coin.findOneAndUpdate(query, update, options);
+              this.Coin.findOneAndUpdate(query, update, options, () => {
+                // console.log('updated');
+              });
+              success(bitcoinValueInUSD);
             }
           } catch (e) {
             console.log(e);
           }
         });
+        request.on('socket', function (socket) {
+          socket.setTimeout(5000);
+          socket.on('timeout', function() {
+            request.abort();
+          });
+        });
+        request.on('error', function(err) {
+            if (err.code === "ECONNRESET") {
+                console.log("Timeout occurs");
+                //specific error treatment
+            }
+            //other error treatment
+        });
       });
     });
   }
 
-  getCoinNames() {
+  getCoinNames(bitcoinValueInUSD) {
     return new Promise((success, failure) => {
       const request = https.get('https://bittrex.com/api/v1.1/public/getcurrencies', (response) => {
         response.setEncoding("utf8");
@@ -135,9 +181,10 @@ module.exports = class CoinModel {
               result = result.map((coin, idx) => ({
                 id: idx,
                 symbol: coin.Currency,
-                name: coin.CurrencyLong
+                name: coin.CurrencyLong,
+                type: (coin.CoinType === 'BITCOIN') ? 'BTC' : 'ETH'
               }));
-              success(result);
+              success(result, bitcoinValueInUSD);
             }
           } catch (e) {
             console.log(e);
@@ -160,10 +207,10 @@ module.exports = class CoinModel {
     });
   }
 
-  getCoinData(coin) {
+  getCoinData(coin, bitcoinValueInUSD) {
     return new Promise((success, failure) => {
-      const type = (coin.CoinType === 'BTC') ? 'BTC' : 'ETH';
-      const request = https.get(`https://bittrex.com/api/v1.1/public/getmarketsummary?market=${type}-${coin.symbol}`, (response) => {
+      console.log(coin);
+      const request = https.get(`https://bittrex.com/api/v1.1/public/getmarketsummary?market=${coin.type}-${coin.symbol}`, (response) => {
         response.setEncoding("utf8");
         let body = "";
         response.on("data", data => {
@@ -184,10 +231,15 @@ module.exports = class CoinModel {
               coin.bid = body['result'][0]["Bid"];
               coin.ask = body['result'][0]["Ask"];
               coin.prevDay = body['result'][0]["PrevDay"];
+              coin.bidUSD = coin.bid * bitcoinValueInUSD;
+              coin.marketCapUSD = coin.bidUSD * coin.volume;
+              coin.percentChangeIn24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
               const query = { name: coin.name };
               const update = coin;
               const options = { upsert: true };
-              this.Coin.findOneAndUpdate(query, update, options);
+              this.Coin.findOneAndUpdate(query, update, options, () => {
+                console.log(update);
+              });
             }
           } catch (e) {
             console.log(e);

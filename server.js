@@ -49,6 +49,8 @@ app.get('/history/:coinSymbol', (req, res) => {
   );
 });
 
+coinModel.getData();
+
 setInterval(() => {
   coinModel.getData();
 }, 10000);
