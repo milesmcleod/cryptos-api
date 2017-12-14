@@ -26,6 +26,7 @@ try {
 
 const coinModel = new CoinModel();
 const historicalCoinModel = new HistoricalCoinModel();
+coinModel.historicalCoinModel = historicalCoinModel;
 // const exchangeModel= new ExchangeModel();
 
 app.get('/coins', (req, res) => {
