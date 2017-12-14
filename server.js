@@ -32,7 +32,8 @@ coinModel.historicalCoinModel = historicalCoinModel;
 app.get('/coins', (req, res) => {
   coinModel.Coin.find((err, coins) => {
     if (err) return res.status(500).send(err);
-    coins = coins.sort((x, y) => x.id - y.id);
+    coins = coins.filter((coin) => coin.marketCapUSD);
+    coins = coins.sort((x, y) => y.marketCapUSD - x.marketCapUSD);
     res.send(coins);
   });
 });

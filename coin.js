@@ -18,6 +18,7 @@ module.exports = class CoinModel {
       ask: Number,
       prevDay: Number,
       bidUSD: Number,
+      prevDayUSD: Number,
       marketCapUSD: Number,
       percentChange24Hours: Number
     }); //live data
@@ -96,6 +97,7 @@ module.exports = class CoinModel {
                 coin.ask = body['result'][0]["Ask"];
                 coin.prevDay = body['result'][0]["PrevDay"];
                 coin.bidUSD = coin.bid;
+                coin.prevDayUSD = coin.prevDay;
                 coin.percentChange24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
                 const query = { name: coin.name };
                 const update = coin;
@@ -177,6 +179,7 @@ module.exports = class CoinModel {
                 coin.ask = body['result'][0]["Ask"];
                 coin.prevDay = body['result'][0]["PrevDay"];
                 coin.bidUSD = coin.bid * bitcoinValueInUSD;
+                coin.prevDayUSD = body['result'][0]["PrevDay"] * bitcoinValueInUSD;
                 coin.percentChange24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
                 const query = { name: coin.name };
                 const update = coin;
@@ -300,6 +303,7 @@ module.exports = class CoinModel {
                 coin.ask = body['result'][0]["Ask"];
                 coin.prevDay = body['result'][0]["PrevDay"];
                 coin.bidUSD = coin.bid * bitcoinValueInUSD;
+                coin.prevDayUSD = body['result'][0]["PrevDay"] * bitcoinValueInUSD;
                 coin.percentChange24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
                 const query = { name: coin.name };
                 const update = coin;
