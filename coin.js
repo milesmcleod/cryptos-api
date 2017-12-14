@@ -59,7 +59,10 @@ module.exports = class CoinModel {
           low7Days = doc["valuePerFifteenMinutesUSD"].reduce((x, y) => {
             return (x.value < y.value) ? x : y;
           });
-          low7Days = high7Days.value;
+          low7Days = low7Days.value;
+        } else if (doc && doc["valuePerFifteenMinutesUSD"].length === 1) {
+          high7Days = doc["valuePerFifteenMinutesUSD"][0].value;
+          low7Days = doc["valuePerFifteenMinutesUSD"][0].value;
         } else {
           high7Days = 0;
           low7Days = 0;
@@ -138,7 +141,10 @@ module.exports = class CoinModel {
           low7Days = doc["valuePerFifteenMinutesUSD"].reduce((x, y) => {
             return (x.value < y.value) ? x : y;
           });
-          low7Days = high7Days.value;
+          low7Days = low7Days.value;
+        } else if (doc && doc["valuePerFifteenMinutesUSD"].length === 1) {
+          high7Days = doc["valuePerFifteenMinutesUSD"][0].value;
+          low7Days = doc["valuePerFifteenMinutesUSD"][0].value;
         } else {
           high7Days = 0;
           low7Days = 0;
@@ -262,7 +268,10 @@ module.exports = class CoinModel {
           low7Days = doc["valuePerFifteenMinutesUSD"].reduce((x, y) => {
             return (x.value < y.value) ? x : y;
           });
-          low7Days = high7Days.value;
+          low7Days = low7Days.value;
+        } else if (doc && doc["valuePerFifteenMinutesUSD"].length === 1) {
+          high7Days = doc["valuePerFifteenMinutesUSD"][0].value;
+          low7Days = doc["valuePerFifteenMinutesUSD"][0].value;
         } else {
           high7Days = 0;
           low7Days = 0;
