@@ -17,7 +17,9 @@ module.exports = class CoinModel {
       bid: Number,
       ask: Number,
       prevDay: Number,
+      lastUSD: Number,
       bidUSD: Number,
+      askUSD: Number,
       prevDayUSD: Number,
       marketCapUSD: Number,
       percentChange24Hours: Number
@@ -96,7 +98,9 @@ module.exports = class CoinModel {
                 coin.bid = body['result'][0]["Bid"];
                 coin.ask = body['result'][0]["Ask"];
                 coin.prevDay = body['result'][0]["PrevDay"];
+                coin.lastUSD = coin.last;
                 coin.bidUSD = coin.bid;
+                coin.askUSD = coin.ask;
                 coin.prevDayUSD = coin.prevDay;
                 coin.percentChange24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
                 const query = { name: coin.name };
@@ -178,7 +182,9 @@ module.exports = class CoinModel {
                 coin.bid = body['result'][0]["Bid"];
                 coin.ask = body['result'][0]["Ask"];
                 coin.prevDay = body['result'][0]["PrevDay"];
-                coin.bidUSD = coin.bid * bitcoinValueInUSD;
+                coin.lastUSD = body['result'][0]["Last"] * bitcoinValueInUSD;
+                coin.bidUSD = body['result'][0]["Bid"] * bitcoinValueInUSD;
+                coin.askUSD = body['result'][0]["Ask"] * bitcoinValueInUSD;
                 coin.prevDayUSD = body['result'][0]["PrevDay"] * bitcoinValueInUSD;
                 coin.percentChange24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
                 const query = { name: coin.name };
@@ -302,7 +308,9 @@ module.exports = class CoinModel {
                 coin.bid = body['result'][0]["Bid"];
                 coin.ask = body['result'][0]["Ask"];
                 coin.prevDay = body['result'][0]["PrevDay"];
-                coin.bidUSD = coin.bid * bitcoinValueInUSD;
+                coin.lastUSD = body['result'][0]["Last"] * bitcoinValueInUSD;
+                coin.bidUSD = body['result'][0]["Bid"] * bitcoinValueInUSD;
+                coin.askUSD = body['result'][0]["Ask"] * bitcoinValueInUSD;
                 coin.prevDayUSD = body['result'][0]["PrevDay"] * bitcoinValueInUSD;
                 coin.percentChange24Hours = ((coin.bid - coin.prevDay) / coin.prevDay) * 100;
                 const query = { name: coin.name };
