@@ -66,16 +66,21 @@ app.get('/history/:coinSymbol/:dataType', (req, res) => {
         dataIntervalInSeconds = 60;
         dataIntervalInMinutes = 1;
       } else if (req.params.dataType.toLowerCase() === 'day') {
-        dataBTC = historicalCoin.valuePerMinuteBTC;
-        dataUSD = historicalCoin.valuePerMinuteUSD;
-        dataIntervalInMilliseconds = 60 * 1000;
-        dataIntervalInSeconds = 60;
-        dataIntervalInMinutes = 1;
+        dataBTC = [];
+        dataUSD = [];
+        for (let i = 0; i < 96; i ++ ) {
+          dataBTC.push(historicalCoin.valuePerFifteenMinutesBTC[i]);
+          dataUSD.push(historicalCoin.valuePerFifteenMinutesUSD[i]);
+          console.log(i);
+        }
+        dataIntervalInMilliseconds = 15 * 60 * 1000;
+        dataIntervalInSeconds = 15 * 60;
+        dataIntervalInMinutes = 15;
       } else if (req.params.dataType.toLowerCase() === 'week') {
         dataBTC = historicalCoin.valuePerFifteenMinutesBTC;
         dataUSD = historicalCoin.valuePerFifteenMinutesUSD;
         dataIntervalInMilliseconds = 15 * 60 * 1000;
-        dataIntervalInSeconds = 60 * 15;
+        dataIntervalInSeconds = 15 * 60;
         dataIntervalInMinutes = 15;
       }
       res.send({
