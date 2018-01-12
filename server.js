@@ -65,13 +65,18 @@ app.get('/history/:coinSymbol/:dataType', (req, res) => {
         dataIntervalInMilliseconds = 60 * 1000;
         dataIntervalInSeconds = 60;
         dataIntervalInMinutes = 1;
+        dataBTC = dataBTC.filter((el) => Date.now() - el.time < 3600000);
+        dataUSD = dataUSD.filter((el) => Date.now() - el.time < 3600000);
       } else if (req.params.dataType.toLowerCase() === 'day') {
         dataBTC = [];
         dataUSD = [];
         for (let i = 0; i < 96; i ++ ) {
-          dataBTC.push(historicalCoin.valuePerFifteenMinutesBTC[i]);
-          dataUSD.push(historicalCoin.valuePerFifteenMinutesUSD[i]);
-          console.log(i);
+          const btcVal = historicalCoin.valuePerFifteenMinutesBTC[i];
+          const usdVal = historicalCoin.valuePerFifteenMinutesUSD[i];
+          if (btcVal && Date.now() - btcVal.time < (3600000 * 24)) {
+            dataBTC.push(btcVal);
+            dataUSD.push(usdVal);
+          }
         }
         dataIntervalInMilliseconds = 15 * 60 * 1000;
         dataIntervalInSeconds = 15 * 60;
@@ -79,6 +84,8 @@ app.get('/history/:coinSymbol/:dataType', (req, res) => {
       } else if (req.params.dataType.toLowerCase() === 'week') {
         dataBTC = historicalCoin.valuePerFifteenMinutesBTC;
         dataUSD = historicalCoin.valuePerFifteenMinutesUSD;
+        dataBTC = dataBTC.filter((el) => Date.now() - el.time < (3600000 * 24 * 7));
+        dataUSD = dataUSD.filter((el) => Date.now() - el.time < (3600000 * 24 * 7));
         dataIntervalInMilliseconds = 15 * 60 * 1000;
         dataIntervalInSeconds = 15 * 60;
         dataIntervalInMinutes = 15;
